@@ -1,6 +1,10 @@
 # interfaceTurbulenceDamping
 
-This repo is intended to provide an gas-fluid two-phase flow model with turbulence damping at the interface. It is based upon the interFoam and/or compressibleInterFoam solvers, and applied to kEpsilon and kOmega models.
+
+
+This repo is intended to provide a revised turbulence model with turbulence damping at the interface for gas-fluid two-phase flows. It is based upon the interFoam and/or compressibleInterFoam solvers, and applied to kOmega models.
+
+
 
 Biao Huang @NBU
 
