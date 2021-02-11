@@ -1,0 +1,185 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//convertToMeters 0.025;	//This is an scaling operation. Done at the end.
+//convertToMeters 0.001;    // in mm;
+//convertToMeters 0.2;        // in dm*2;
+//convertToMeters 0.1;          // in dm;
+convertToMeters 1;
+
+// parameters
+// Bentzen et al. 2016;
+// width = 0.3; height = 0.26; length = 15 m;
+
+//halfSideLength 0.1;
+//sideLength 0.2;
+width 0.3;
+height 0.26;
+halfWidth 0.15;
+halfHeight 0.13;
+pipeLength 15;
+
+//inletWaterDepth #calc "($halfSideLength)/2"; 
+slope 0.00082;  // slope of pipe; NOTE the dimension !!!!!!!!!
+
+inletWaterDepth 0.0585; 
+
+
+
+xmin 0;
+xmax $pipeLength;
+yminInlet #calc "-$halfHeight";
+ymaxInlet $halfHeight;
+yminOutlet #calc "$yminInlet - ($pipeLength)*($slope)";
+ymaxOutlet #calc "$ymaxInlet - ($pipeLength)*($slope)";
+zmin #calc "-$halfWidth";
+zmax $halfWidth;
+waterInletPosition #calc "$yminInlet + $inletWaterDepth";
+waterOutletPosition #calc "$yminOutlet + $inletWaterDepth";
+
+deltax 0.04;	
+deltay1 0.002;	
+deltay2 0.002;	
+deltaz 0.03;
+
+lx #calc "$xmax -$xmin";
+ly1 $inletWaterDepth;
+ly2 #calc "$height - $inletWaterDepth";
+lz #calc "$zmax - ($zmin)";
+
+xcells #calc "round($lx/$deltax)";
+ycells1 #calc "round($ly1/$deltay1)";
+ycells2 #calc "round($ly2/$deltay2)";
+zcells #calc "round($lz/$deltaz)";
+
+// stretch coefficient
+//stretch 0.3;
+//stretch1 2;
+//stretch2 0.5;
+
+
+vertices
+(
+    //block0 vertices
+    ($xmin $yminInlet $zmin)		//0
+    ($xmax $yminOutlet $zmin)	    //1
+    ($xmax $waterOutletPosition $zmin)	//2
+    ($xmin $waterInletPosition $zmin)  //3
+	($xmin $yminInlet $zmax)		//4
+	($xmax $yminOutlet $zmax)	    //5
+	($xmax $waterOutletPosition $zmax)	//6
+	($xmin $waterInletPosition $zmax)	//7
+
+    //block1 new vertices
+    ($xmin $ymaxInlet $zmin)		//8
+    ($xmax $ymaxOutlet $zmin)	    //9
+    ($xmin $ymaxInlet $zmax)		//10
+    ($xmax $ymaxOutlet $zmax)	   //11
+	
+);
+
+
+blocks
+(
+    //block0
+    hex (0 1 2 3 4 5 6 7) 	($xcells $ycells1 $zcells) simpleGrading (1 1 1)
+    //block1
+    hex (3 2 9 8 7 6 11 10) 	($xcells $ycells2 $zcells) simpleGrading (1 1 1)
+
+);
+
+edges
+(
+   
+);
+
+boundary
+(
+
+    waterInlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+
+    airInlet
+    {
+        type patch;
+        faces
+        (
+            (3 7 10 8)
+        );
+    }
+	
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)
+            (2 6 11 9)
+        );
+    }
+	
+    pipeBackWall
+    {
+        type wall;
+        faces
+        (
+            (0 1 2 3)
+            (3 2 9 8)
+        );
+    }
+	
+    pipeFrontWall
+    {
+        type wall;
+        faces
+        (
+            (4 5 6 7)
+            (7 6 11 10)
+        );
+    }
+	
+    pipeTopWall
+    {
+        type wall;
+        faces
+        (
+            (8 10 11 9)
+        );
+    }
+	
+    pipeBottomWall
+    {
+        type wall;
+        faces
+        (
+            (0 4 5 1)
+        );
+    }
+	
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //

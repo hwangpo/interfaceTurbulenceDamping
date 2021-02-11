@@ -1,0 +1,187 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  6                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "alpha.water.*"
+    {
+        nAlphaCorr      3;
+        nAlphaSubCycles 1;
+        cAlpha          1;
+		icAlpha         0;
+
+        MULESCorr       yes;
+        nLimiterIter    10;
+		alphaApplyPrevCorr  yes;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
+		minIter         1;
+    }
+
+    pcorr
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-5;
+        relTol          0;
+    }
+
+    pcorrFinal
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-8;
+        relTol          0;
+    }
+
+    p_rgh
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0.01;
+    }
+
+    p_rghFinal
+    {
+        $p_rgh;
+        relTol          0;
+    }
+
+	/*
+    "(U|UFinal)"
+    {
+        solver          PBiCGStab;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+	
+
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-08;
+        relTol          0;
+	    minIter 	    1;
+    
+    }
+	*/
+	/*
+    "(k|epsilon|omega).*"
+    {
+        solver          PBiCGStab;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
+    */
+	
+	/*
+    "(U|k|epsilon)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+
+    "(U|k|epsilon)Final"
+    {
+        $U;
+        relTol          0;
+    }
+	*/
+	
+    "(U|k|omega)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+	
+    "(U|k|omega)Final"
+    {
+        $U;
+        relTol          0;
+    }
+
+	/*
+    "(U|k|omega).*"
+    {
+        solver          smoothSolver;
+
+        smoother        symGaussSeidel;
+        nSweeps         1;
+
+        tolerance       1e-7;
+        relTol          0.1;
+        minIter         1;
+    };
+	*/
+}
+
+
+
+
+PIMPLE
+{
+    //momentumPredictor   yes;//solve Navier-Stokes equations implicitly
+    //nOuterCorrectors    1;//number of outer correctors
+    //nCorrectors         3;//number of pressure - velocity coupling iterations
+    //nNonOrthogonalCorrectors 1;//number of pressure iterations
+	
+    momentumPredictor   yes;
+
+    nOuterCorrectors    1;
+    nCorrectors         3;
+    nNonOrthogonalCorrectors 1;
+	/*
+    maxCo               10;
+    maxAlphaCo          5;
+
+    rDeltaTSmoothingCoeff 0.05;
+    rDeltaTDampingCoeff 0.5;
+    nAlphaSpreadIter    0;
+    nAlphaSweepIter     0;
+    maxDeltaT           1;
+	*/
+}
+
+relaxationFactors
+{
+    fields
+    {
+        ".*" 1;
+    }
+    equations
+    {
+        ".*" 1;//no under-relaxation in this case
+    }
+}
+
+// no idea what this is; copy from tutorials/multiphase/interFoam/ras/DTCHull;
+/*
+cache
+{
+    grad(U);
+}
+*/
+
+// ************************************************************************* //

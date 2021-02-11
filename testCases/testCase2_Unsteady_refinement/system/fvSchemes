@@ -1,0 +1,74 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  6                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    //default         localEuler;// for steady state cases;
+	default         Euler;
+    //default         CrankNicolson 0;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+	limitedGrad     cellLimited Gauss linear 1;
+//    grad(U)         cellLimited Gauss linear 1;
+}
+
+divSchemes
+{
+    div(rhoPhi,U)    Gauss linearUpwindV grad(U);
+    div(phi,alpha)   Gauss vanLeer;
+    div(phirb,alpha) Gauss linear;
+	
+    //div(phi,k)      bounded Gauss linearUpwind default; 
+	//div(phi,omega)  bounded Gauss linearUpwind default; 
+    div(phi,k)      bounded Gauss linearUpwind limitedGrad; 
+	div(phi,omega)  bounded Gauss linearUpwind limitedGrad; 
+
+	
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;//
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+//fluxRequired
+//{
+//    default         no;
+//    p_rgh;
+//    pcorr;
+//}
+
+// it is necessary for kOmegaSST model:
+wallDist
+{
+	method meshWave;
+}
+
+// ************************************************************************* //

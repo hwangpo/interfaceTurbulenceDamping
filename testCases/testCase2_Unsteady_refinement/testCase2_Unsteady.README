@@ -1,0 +1,62 @@
+#How to run me:
+NOTE: Using Local Time Stepping for steady state flow
+
+
+#To clean the directory, this is optional
+
+foamCleanTutorials
+foamCleanPolyMesh
+
+
+#To generate the mesh and check mesh quality
+
+blockMesh
+
+checkMesh
+
+//transformPoints -rollPitchYaw '(0 90 0)'
+/*
+The rollPitchYaw option takes three angles (degrees):
+- roll (rotation about x) followed by
+- pitch (rotation about y) followed by
+- yaw (rotation about z)
+The yawPitchRoll does yaw followed by pitch followed by roll.
+*/
+
+//transformPoints -translate '(0 0 1)'
+
+checkMesh | tee log.checkMesh
+
+
+# Visualization
+
+paraFoam
+
+
+
+//
+rm -rf 0
+cp -r 0_org/ 0
+cp 0/alpha.water.orig 0/alpha.water
+
+setFields
+
+decomposePar
+mpirun -np 4 renumberMesh -overwrite -parallel
+mpirun -np 4 interFoam -parallel | tee log.interFoam
+
+reconstructPar
+
+postProcess -func probesDict
+
+plot 'postProcessing/airInletFlux/0/surfaceFieldValue.dat' u 1:2
+
+
+
+
+
+
+
+
+
+
